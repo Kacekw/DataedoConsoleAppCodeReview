@@ -50,7 +50,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <Content Include="data.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup />

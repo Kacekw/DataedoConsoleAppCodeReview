@@ -2,11 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
     using System.IO;
     using System.Linq;
-    using System.Threading.Tasks;
-    using System.Data.Common;
 
     public class DataReader
     {
@@ -110,11 +107,11 @@
             {
                 try
                 {
-                    importedObject.Type = importedObject.Type.Trim().Replace(" ", "").Replace(Environment.NewLine, "").ToUpper();
-                    importedObject.Name = importedObject.Name.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
-                    importedObject.Schema = importedObject.Schema.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
-                    importedObject.ParentName = importedObject.ParentName.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
-                    importedObject.ParentType = importedObject.ParentType.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
+                    importedObject.Type = importedObject.Type?.Trim().Replace(" ", "").Replace(Environment.NewLine, "").ToUpper();
+                    importedObject.Name = importedObject.Name?.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
+                    importedObject.Schema = importedObject.Schema?.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
+                    importedObject.ParentName = importedObject.ParentName?.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
+                    importedObject.ParentType = importedObject.ParentType?.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
                 }
                 catch
                 {
@@ -137,11 +134,11 @@
                     var importedObject = importedObjects.ToArray()[i];
                     foreach (var impObj in importedObjects)
                     {
-                        if (impObj.ParentType == importedObject.Type)
+                        if (!(string.IsNullOrEmpty(impObj.ParentType)) && impObj.ParentType.Equals(importedObject.Type))
                         {
-                            if (impObj.ParentName == importedObject.Name)
+                            if (impObj.ParentName.Equals(importedObject.Name))
                             {
-                                importedObject.NumberOfChildren = 1 + importedObject.NumberOfChildren;
+                                importedObject.NumberOfChildren++;
                             }
                         }
                     }
@@ -185,7 +182,7 @@
                 {
                     if (!(string.IsNullOrEmpty(column.ParentName)) && column.ParentName.Equals(table.Name))
                     {
-                        Console.WriteLine($"\t\tColumn '{column.Name}' with {column.DataType} data type {(column.IsNullable == "1" ? "accepts nulls" : "with no nulls")}");
+                        Console.WriteLine($"\t\tColumn '{column.Name}' with {column.DataType} data type {(column.IsNullable.Trim() == "1" ? "accepts nulls" : "with no nulls")}");
                     }
                 }
             }
@@ -194,11 +191,6 @@
 
     class ImportedObject : ImportedObjectBaseClass
     {
-        public string Name
-        {
-            get;
-            set;
-        }
         public string Schema;
 
         public string ParentName;

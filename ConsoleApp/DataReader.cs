@@ -71,33 +71,61 @@
         private IEnumerable<ImportedObject> ImportObjects(string fileToImport)
         {
             var importedObjects = new List<ImportedObject>();
+            var importedLines = ReadTheFile(fileToImport);
 
-            var streamReader = new StreamReader(fileToImport);
-
-            var importedLines = new List<string>();
-            while (!streamReader.EndOfStream)
-            {
-                var line = streamReader.ReadLine();
-                importedLines.Add(line);
-            }
-
-            for (int i = 0; i <= importedLines.Count; i++)
+            for (int i = 0; i < importedLines.Count; i++)
             {
                 var importedLine = importedLines[i];
+                ImportedObject importedObject = new ImportedObject();
                 var values = importedLine.Split(';');
-                var importedObject = new ImportedObject();
-                importedObject.Type = values[0];
-                importedObject.Name = values[1];
-                importedObject.Schema = values[2];
-                importedObject.ParentName = values[3];
-                importedObject.ParentType = values[4];
-                importedObject.DataType = values[5];
-                importedObject.IsNullable = values[6];
 
-                importedObjects.Add(importedObject);
+                try
+                {
+                    importedObject.Type = values[0];
+                    importedObject.Name = values[1];
+                    importedObject.Schema = values[2];
+                    importedObject.ParentName = values[3];
+                    importedObject.ParentType = values[4];
+                    importedObject.DataType = values[5];
+                    importedObject.IsNullable = values[6];
+                }
+                catch
+                {
+                    // TODO: logic in case when reading the values and assigning it to the new object did not succeed
+                    // assuming that program should try to do it anyway, logging of what went wrong can be implemented
+                    // indexes, row numbers etc can be catched here out of ArgumentOutOfRangeException
+                }
+                finally
+                {
+                    if (!(importedObject is null)) importedObjects.Add(importedObject);
+                }
             }
 
             return importedObjects;
+        }
+
+        private List<string> ReadTheFile(string fileToImport)
+        {
+            var importedLines = new List<string>();
+
+            try
+            {
+                using (var streamReader = new StreamReader(fileToImport))
+                {
+                    while (!streamReader.EndOfStream)
+                    {
+                        var line = streamReader.ReadLine();
+                        importedLines.Add(line);
+                    }
+                }
+
+                return importedLines;
+            }
+            catch
+            {
+                // TODO logic for handling file reading issues
+                throw; // throwing it even though it should not be re-throwed 
+            }
         }
 
         private bool ClearAndCorrectImportedData(ref IEnumerable<ImportedObject> importedObjects)

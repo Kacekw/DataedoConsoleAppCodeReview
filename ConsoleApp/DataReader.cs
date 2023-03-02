@@ -18,7 +18,14 @@
             // assign number of children
             AssignNumberOfChildren(ref ImportedObjects);
 
-            PrintData(ImportedObjects);
+            if (printData is true)
+            {
+                PrintData(ImportedObjects);
+            }
+            else
+            {
+                Console.WriteLine("User specified not to print the data.");
+            }
 
             Pause();
         }

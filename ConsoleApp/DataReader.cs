@@ -160,7 +160,7 @@
         {
             foreach (var database in importedObjects)
             {
-                if (database.Type == "DATABASE")
+                if (database.Type.Equals("DATABASE"))
                 {
                     Console.WriteLine($"Database '{database.Name}' ({database.NumberOfChildren} tables)");
 
@@ -201,10 +201,7 @@
         public string Schema;
 
         public string ParentName;
-        public string ParentType
-        {
-            get; set;
-        }
+        public string ParentType{ get; set; }
 
         public string DataType { get; set; }
         public string IsNullable { get; set; }

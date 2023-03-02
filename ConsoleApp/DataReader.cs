@@ -18,53 +18,19 @@
             ClearAndCorrectImportedData(ref ImportedObjects);
 
             // assign number of children
-            for (int i = 0; i < ImportedObjects.Count(); i++)
-            {
-                var importedObject = ImportedObjects.ToArray()[i];
-                foreach (var impObj in ImportedObjects)
-                {
-                    if (impObj.ParentType == importedObject.Type)
-                    {
-                        if (impObj.ParentName == importedObject.Name)
-                        {
-                            importedObject.NumberOfChildren = 1 + importedObject.NumberOfChildren;
-                        }
-                    }
-                }
-            }
+            AssignNumberOfChildren(ref  ImportedObjects);
 
-            foreach (var database in ImportedObjects)
-            {
-                if (database.Type == "DATABASE")
-                {
-                    Console.WriteLine($"Database '{database.Name}' ({database.NumberOfChildren} tables)");
+            PrintData(ImportedObjects);
 
-                    // print all database's tables
-                    foreach (var table in ImportedObjects)
-                    {
-                        if (table.ParentType.ToUpper() == database.Type)
-                        {
-                            if (table.ParentName == database.Name)
-                            {
-                                Console.WriteLine($"\tTable '{table.Schema}.{table.Name}' ({table.NumberOfChildren} columns)");
+            Pause();
+        }
 
-                                // print all table's columns
-                                foreach (var column in ImportedObjects)
-                                {
-                                    if (column.ParentType.ToUpper() == table.Type)
-                                    {
-                                        if (column.ParentName == table.Name)
-                                        {
-                                            Console.WriteLine($"\t\tColumn '{column.Name}' with {column.DataType} data type {(column.IsNullable == "1" ? "accepts nulls" : "with no nulls")}");
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
+        /// <summary>
+        /// Method for ending the printing the data-printing sequence and keeping the console window up.
+        /// </summary>
+        private void Pause()
+        {
+            // here's some space for more sophisticated way of ending the printing sequence, eg. logging what happened along the way
             Console.ReadLine();
         }
 
@@ -128,6 +94,11 @@
             }
         }
 
+        /// <summary>
+        /// Clears the imported objects out of set of the unwanted signs.
+        /// </summary>
+        /// <param name="importedObjects">List of imported objects</param>
+        /// <returns>True if no errors were met during processing.</returns>
         private bool ClearAndCorrectImportedData(ref IEnumerable<ImportedObject> importedObjects)
         {
             if (importedObjects is null) return false;
@@ -151,6 +122,68 @@
             }
 
             return dataCorrectionOperationWasSuccessfull;
+        }
+
+        /// <returns>True if no errors were met during processing.</returns>
+        private bool AssignNumberOfChildren(ref IEnumerable<ImportedObject> importedObjects)
+        {
+            bool assigningWasSuccessfullFlag = true;
+
+            try
+            {
+                for (int i = 0; i < importedObjects.Count(); i++)
+                {
+                    var importedObject = importedObjects.ToArray()[i];
+                    foreach (var impObj in importedObjects)
+                    {
+                        if (impObj.ParentType == importedObject.Type)
+                        {
+                            if (impObj.ParentName == importedObject.Name)
+                            {
+                                importedObject.NumberOfChildren = 1 + importedObject.NumberOfChildren;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { assigningWasSuccessfullFlag = false; }
+
+            return assigningWasSuccessfullFlag;
+        }
+
+        private void PrintData(IEnumerable<ImportedObject> importedObjects)
+        {
+            foreach (var database in importedObjects)
+            {
+                if (database.Type == "DATABASE")
+                {
+                    Console.WriteLine($"Database '{database.Name}' ({database.NumberOfChildren} tables)");
+
+                    // print all database's tables
+                    foreach (var table in importedObjects)
+                    {
+                        if (table.ParentType.ToUpper() == database.Type)
+                        {
+                            if (table.ParentName == database.Name)
+                            {
+                                Console.WriteLine($"\tTable '{table.Schema}.{table.Name}' ({table.NumberOfChildren} columns)");
+
+                                // print all table's columns
+                                foreach (var column in importedObjects)
+                                {
+                                    if (column.ParentType.ToUpper() == table.Type)
+                                    {
+                                        if (column.ParentName == table.Name)
+                                        {
+                                            Console.WriteLine($"\t\tColumn '{column.Name}' with {column.DataType} data type {(column.IsNullable == "1" ? "accepts nulls" : "with no nulls")}");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

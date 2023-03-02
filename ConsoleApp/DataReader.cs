@@ -24,7 +24,7 @@
         }
 
         /// <summary>
-        /// Method for ending the printing the data-printing sequence and keeping the console window up.
+        /// Method for ending the data-printing sequence and keeping the console window up.
         /// </summary>
         private void Pause()
         {

@@ -9,45 +9,13 @@
 
     public class DataReader
     {
-        IEnumerable<ImportedObject> ImportedObjects;
-
         public void ImportAndPrintData(string fileToImport, bool printData = true)
         {
-            ImportedObjects = new List<ImportedObject>() { new ImportedObject() };
-
-            var streamReader = new StreamReader(fileToImport);
-
-            var importedLines = new List<string>();
-            while (!streamReader.EndOfStream)
-            {
-                var line = streamReader.ReadLine();
-                importedLines.Add(line);
-            }
-
-            for (int i = 0; i <= importedLines.Count; i++)
-            {
-                var importedLine = importedLines[i];
-                var values = importedLine.Split(';');
-                var importedObject = new ImportedObject();
-                importedObject.Type = values[0];
-                importedObject.Name = values[1];
-                importedObject.Schema = values[2];
-                importedObject.ParentName = values[3];
-                importedObject.ParentType = values[4];
-                importedObject.DataType = values[5];
-                importedObject.IsNullable = values[6];
-                ((List<ImportedObject>)ImportedObjects).Add(importedObject);
-            }
+            IEnumerable<ImportedObject> ImportedObjects;
+            ImportedObjects = ImportObjects(fileToImport);
 
             // clear and correct imported data
-            foreach (var importedObject in ImportedObjects)
-            {
-                importedObject.Type = importedObject.Type.Trim().Replace(" ", "").Replace(Environment.NewLine, "").ToUpper();
-                importedObject.Name = importedObject.Name.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
-                importedObject.Schema = importedObject.Schema.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
-                importedObject.ParentName = importedObject.ParentName.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
-                importedObject.ParentType = importedObject.ParentType.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
-            }
+            ClearAndCorrectImportedData(ref ImportedObjects);
 
             // assign number of children
             for (int i = 0; i < ImportedObjects.Count(); i++)
@@ -98,6 +66,63 @@
             }
 
             Console.ReadLine();
+        }
+
+        private IEnumerable<ImportedObject> ImportObjects(string fileToImport)
+        {
+            var importedObjects = new List<ImportedObject>();
+
+            var streamReader = new StreamReader(fileToImport);
+
+            var importedLines = new List<string>();
+            while (!streamReader.EndOfStream)
+            {
+                var line = streamReader.ReadLine();
+                importedLines.Add(line);
+            }
+
+            for (int i = 0; i <= importedLines.Count; i++)
+            {
+                var importedLine = importedLines[i];
+                var values = importedLine.Split(';');
+                var importedObject = new ImportedObject();
+                importedObject.Type = values[0];
+                importedObject.Name = values[1];
+                importedObject.Schema = values[2];
+                importedObject.ParentName = values[3];
+                importedObject.ParentType = values[4];
+                importedObject.DataType = values[5];
+                importedObject.IsNullable = values[6];
+
+                importedObjects.Add(importedObject);
+            }
+
+            return importedObjects;
+        }
+
+        private bool ClearAndCorrectImportedData(ref IEnumerable<ImportedObject> importedObjects)
+        {
+            if (importedObjects is null) return false;
+
+            bool dataCorrectionOperationWasSuccessfull = true;
+
+            foreach (var importedObject in importedObjects)
+            {
+                try
+                {
+                    importedObject.Type = importedObject.Type.Trim().Replace(" ", "").Replace(Environment.NewLine, "").ToUpper();
+                    importedObject.Name = importedObject.Name.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
+                    importedObject.Schema = importedObject.Schema.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
+                    importedObject.ParentName = importedObject.ParentName.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
+                    importedObject.ParentType = importedObject.ParentType.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
+                }
+                catch
+                {
+                    dataCorrectionOperationWasSuccessfull = false;
+                }
+            }
+
+            return dataCorrectionOperationWasSuccessfull;
         }
     }
 

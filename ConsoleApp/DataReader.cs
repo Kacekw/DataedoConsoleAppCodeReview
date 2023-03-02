@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Data.Common;
 
     public class DataReader
     {
@@ -18,7 +19,7 @@
             ClearAndCorrectImportedData(ref ImportedObjects);
 
             // assign number of children
-            AssignNumberOfChildren(ref  ImportedObjects);
+            AssignNumberOfChildren(ref ImportedObjects);
 
             PrintData(ImportedObjects);
 
@@ -162,25 +163,29 @@
                     // print all database's tables
                     foreach (var table in importedObjects)
                     {
-                        if (table.ParentType.ToUpper() == database.Type)
+                        if (!(string.IsNullOrEmpty(table.ParentType))
+                            && table.ParentType.ToUpper().Equals(database.Type)
+                            && table.ParentName.Equals(database.Name))
                         {
-                            if (table.ParentName == database.Name)
-                            {
-                                Console.WriteLine($"\tTable '{table.Schema}.{table.Name}' ({table.NumberOfChildren} columns)");
+                            Console.WriteLine($"\tTable '{table.Schema}.{table.Name}' ({table.NumberOfChildren} columns)");
 
-                                // print all table's columns
-                                foreach (var column in importedObjects)
-                                {
-                                    if (column.ParentType.ToUpper() == table.Type)
-                                    {
-                                        if (column.ParentName == table.Name)
-                                        {
-                                            Console.WriteLine($"\t\tColumn '{column.Name}' with {column.DataType} data type {(column.IsNullable == "1" ? "accepts nulls" : "with no nulls")}");
-                                        }
-                                    }
-                                }
-                            }
+                            // print all table's columns
+                            PrintTableColumns(importedObjects, table);
                         }
+                    }
+                }
+            }
+        }
+
+        private void PrintTableColumns(IEnumerable<ImportedObject> importedObjects, ImportedObject table)
+        {
+            foreach (var column in importedObjects)
+            {
+                if (!(string.IsNullOrEmpty(column.ParentType)) && column.ParentType.ToUpper().Equals(table.Type))
+                {
+                    if (!(string.IsNullOrEmpty(column.ParentName)) && column.ParentName.Equals(table.Name))
+                    {
+                        Console.WriteLine($"\t\tColumn '{column.Name}' with {column.DataType} data type {(column.IsNullable == "1" ? "accepts nulls" : "with no nulls")}");
                     }
                 }
             }
